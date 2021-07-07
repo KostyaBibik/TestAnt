@@ -20,23 +20,33 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         //считывание с слайдера значение скорости
-        speed = slider.value; 
+        speed = slider.value;
 
-        //Vector2 direction = touchPad.GetDirection();//
-
+        //для мобильных устройств
         if (Input.touchCount > 0)
-        {
+        {            
             Touch touch = Input.GetTouch(0);
             Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
             touchPosition.z = 0f;            
-            touchPositions.Enqueue(touchPosition);            
+            touchPositions.Enqueue(touchPosition);
         }
-        if (transform.position == touchPositions.Peek())
+        else  //для ПК 
+        if (Input.GetMouseButton(0))
         {
-            touchPositions.Dequeue();
+            Vector3 touchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            touchPosition.z = 0f;
+            touchPositions.Enqueue(touchPosition);
+        }
+
+        if (touchPositions.Count != 0 && transform.position == touchPositions.Peek())
+        {
+            if (touchPositions.Count != 0) touchPositions.Dequeue();
         }
         line.SetPosition(0, transform.position);
-        line.SetPosition(1, touchPositions.Peek());        
-        transform.position = Vector3.MoveTowards(transform.position, touchPositions.Peek(), speed * Time.deltaTime);   
+        if (touchPositions.Count != 0)
+        {
+            line.SetPosition(1, touchPositions.Peek());
+            transform.position = Vector3.MoveTowards(transform.position, touchPositions.Peek(), speed * Time.deltaTime);
+        }   
     }
 }
